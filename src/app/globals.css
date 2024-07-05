@@ -1,0 +1,80 @@
+/* @tailwind base; */
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+  background-color: #f9f9f9 !important;
+}
+
+main {
+  height: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+body {
+  @apply text-base;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  margin: 0;
+  line-height: inherit;
+  place-items: center;
+}
+
+:root {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.wrapper {
+  /* height: 100%; */
+  width: 100%;
+  background-color: #fff;
+  margin: 5px auto 25px;
+  border-radius: 10px;
+  max-width: 1500px;
+}
+
+/* .button {
+  color: #fff;
+  display: inline-block;
+  border-radius: 30px;
+  padding: 10px 20px;
+  min-width: 100px;
+  text-align: center;
+  cursor: pointer;
+  -webkit-transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+  border: 1px solid transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.button--black {
+  background-color: #232323;
+  padding: 12px 0 14px;
+  width: 230px;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.button--black:hover {
+  background-color: #3d3d3d;
+} */
