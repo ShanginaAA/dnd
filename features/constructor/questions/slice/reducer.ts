@@ -24,7 +24,15 @@ const initialState: IQuestionsSliceState = {
 export const questionsSlice = createSlice({
   name: 'questions',
   initialState,
-  reducers: {},
+  reducers: {
+    addItem(state, action: PayloadAction<Questions>) {
+      state.items.push({
+        id: `${state.items.length + 1}`,
+        name: `Ваш первый вопрос ${state.items.length + 1}`,
+        ...action.payload,
+      });
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchQuestions.pending, (state) => {
@@ -43,6 +51,6 @@ export const questionsSlice = createSlice({
   },
 });
 
-export const {} = questionsSlice.actions;
+export const { addItem } = questionsSlice.actions;
 
 export default questionsSlice.reducer;

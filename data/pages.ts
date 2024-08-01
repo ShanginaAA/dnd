@@ -11,4 +11,9 @@ export const PAGES: FormPages[] = [
     page: 2,
     questionIds: [4, 5],
   },
+  {
+    id: 3,
+    page: 3,
+    questionIds: [],
+  },
 ];

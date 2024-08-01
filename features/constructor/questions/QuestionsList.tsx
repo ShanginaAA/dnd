@@ -1,71 +1,64 @@
-import { Box, Typography } from '@mui/material';
-import React, { DragEventHandler, FC, useCallback } from 'react';
+import { Box } from '@mui/material';
+import { FC } from 'react';
 import QuestionItem from './QuestionItem';
-import { Droppable, Draggable } from '@hello-pangea/dnd';
-import { useAppSelector } from '../../../hooks/useAppSelector';
+import { useAppSelector } from '~/hooks/useAppSelector';
 import { selectItems } from './slice';
 import { selectQuestionIdsById } from '../pages/slice';
+import EmptyPage from './EmptyPage';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 
 type QuestionsListParams = {
-  id: number;
+  page_id: number;
 };
 
-const QuestionsList: FC<QuestionsListParams> = ({ id }) => {
-  const questionIds = useAppSelector((state) => selectQuestionIdsById(state, id));
+const QuestionsList: FC<QuestionsListParams> = ({ page_id }) => {
+  const questionIds = useAppSelector((state) => selectQuestionIdsById(state, page_id));
   const questions = useAppSelector(selectItems);
 
-  const onDragOver = useCallback<DragEventHandler<HTMLDivElement>>((event) => {
-    event.preventDefault();
-  }, []);
-
-  const onDrop = useCallback<DragEventHandler<HTMLDivElement>>((event) => {
-    event.preventDefault();
-    const data = event.dataTransfer.getData('text/html');
-
-    // const parsed = new DOMParser().parseFromString(data, 'text/html');
-    // const { body } = parsed;
-    // const result = body.childNodes;
-
-    const selection = document.getSelection() || window.getSelection();
-    // const range = document.caretRangeFromPoint(event.clientX, event.clientY)!;
-
-    console.log(selection);
-  }, []);
-
   return (
-    <Box
-      sx={{ position: 'relative', pb: '93px', backgroundColor: 'rgba(0,0,0,.02)' }}
-      onDragOver={onDragOver}
-      onDrop={onDrop}>
-      <Droppable key={id} droppableId={`${id}`}>
-        {(provided) => (
-          <div ref={provided.innerRef} {...provided.droppableProps}>
-            {typeof questionIds !== 'undefined' ? (
+    <Droppable droppableId={`page-${page_id}`} type={`droppableSubItem`}>
+      {(provided, snapshot) => (
+        <div ref={provided.innerRef} style={{ backgroundColor: 'rgba(0,0,0,.02)' }}>
+          <Box
+            sx={{
+              position: 'relative',
+              pb: 0,
+              ...(questionIds.length > 0 && { pb: '93px' }),
+            }}>
+            {questionIds.length > 0 ? (
               questionIds.map((item, index) =>
                 questions
                   .filter((obj) => obj.id === `${item}`)
                   .map((obj) => (
-                    <Draggable key={obj.id} draggableId={`${obj.id}`} index={index}>
-                      {(provided) => (
+                    <Draggable key={obj.id} draggableId={`question-${obj.id}`} index={index}>
+                      {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          {...provided.dragHandleProps}>
-                          <QuestionItem name={obj.name} type={obj.type} />
+                          style={{
+                            ...provided.draggableProps.style,
+                            borderBottom: '1px solid #D9D9D9',
+                            height: 108,
+                          }}>
+                          <QuestionItem
+                            key={index}
+                            name={obj.name!}
+                            type={obj.type}
+                            provided={provided}
+                          />
                         </div>
                       )}
                     </Draggable>
                   )),
               )
             ) : (
-              <></>
+              <EmptyPage />
             )}
-
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </Box>
+          </Box>
+          {provided.placeholder}
+        </div>
+      )}
+    </Droppable>
   );
 };
 

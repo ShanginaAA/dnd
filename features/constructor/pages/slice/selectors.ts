@@ -9,7 +9,7 @@ export const selectItemById = (state: RootState, id: number) => {
 };
 
 export const selectQuestionIdsById = (state: RootState, id: number) => {
-  return state.formPages.items.find((obj) => obj.id === id)?.questionIds;
+  return state.formPages.items.find((obj) => obj.id === id)!.questionIds;
 };
 
 export const selectTotal = (state: RootState) => {

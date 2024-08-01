@@ -16,7 +16,7 @@ export const TYPE: QuestionType[] = [
   { id: '5', name: 'Несколько вариантов', icon: '/elements/square-check.png' },
   { id: '6', name: 'Выпадающий список', icon: '' },
   { id: '7', name: 'Да / Нет', icon: '' },
-  { id: '8', name: 'Число', icon: '' },
+  { id: '8', name: 'Число', icon: '/elements/number.png' },
   { id: '9', name: 'Оценки по шкале', icon: '' },
   { id: '10', name: 'Дата', icon: '' },
 ];

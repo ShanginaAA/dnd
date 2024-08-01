@@ -6,6 +6,11 @@ class QuestionsService {
     const response = '';
     return response;
   }
+
+  async createQuestion(data: Questions) {
+    const response = '';
+    return response;
+  }
 }
 
 export const questionsService = new QuestionsService();

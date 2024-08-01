@@ -1,9 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
 import { fetchPages } from './actions';
-import { FormPages } from '../../../../types/pages.type';
-import { QuestionPage, QuestionPosition } from '../../../../types/questions.type';
-import { ContentCutOutlined } from '@mui/icons-material';
+import { FormPages, PagePosition, QuestionIdPage } from '~/types/pages.type';
+import { QuestionPage, QuestionPosition } from '~/types/questions.type';
 
 export enum Status {
   LOADING = 'loading',
@@ -33,10 +31,25 @@ export const pagesSlice = createSlice({
       state.items.push({ ...action.payload });
       state.total = state.items.length;
     },
+    addQuestionId(state, action: PayloadAction<QuestionIdPage>) {
+      const questionIds = state.items.find((obj) => obj.id === action.payload.id)?.questionIds!;
+
+      questionIds.splice(action.payload.destination_index, 0, action.payload.questionId);
+    },
     removeItem(state, action: PayloadAction<number>) {
       state.items = state.items.filter((obj) => obj.id !== action.payload);
     },
-    reorder(state, action: PayloadAction<QuestionPosition>) {
+    reorderPage(state, action: PayloadAction<PagePosition>) {
+      // удалить 1 элемент начиная с start_index (source.index)
+      const [removed] = state.items.splice(action.payload.start_index, 1);
+      // с идндекса назначения (destination.index) удалить 0 элеметов и вставить removed
+      state.items.splice(action.payload.end_index, 0, removed);
+
+      // state.items.map((obj) =>
+      //   obj.id === action.payload.fk_page_id ? (obj.questionIds = result) : obj,
+      // );
+    },
+    reorderQuestionIds(state, action: PayloadAction<QuestionPosition>) {
       const result = state.items.find((obj) => obj.id === action.payload.fk_page_id)?.questionIds!;
       // удалить 1 элемент начиная с start_index (source.index)
       const [removed] = result.splice(action.payload.start_index, 1);
@@ -47,7 +60,7 @@ export const pagesSlice = createSlice({
         obj.id === action.payload.fk_page_id ? (obj.questionIds = result) : obj,
       );
     },
-    move(state, action: PayloadAction<QuestionPage>) {
+    moveQuestion(state, action: PayloadAction<QuestionPage>) {
       const sourceClone = state.items.find((obj) => obj.id === action.payload.source_page_id)!;
       const destClone = state.items.find((obj) => obj.id === action.payload.destination_page_id)!;
       // удалить 1 элемент начиная с start_index (source.index) с одной страницы
@@ -77,6 +90,7 @@ export const pagesSlice = createSlice({
   },
 });
 
-export const { addItem, removeItem, reorder, move } = pagesSlice.actions;
+export const { addItem, addQuestionId, removeItem, reorderPage, reorderQuestionIds, moveQuestion } =
+  pagesSlice.actions;
 
 export default pagesSlice.reducer;

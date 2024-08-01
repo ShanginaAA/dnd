@@ -5,10 +5,9 @@ export type QuestionType = {
 };
 
 export type Questions = {
-  id: string;
-  name: string;
+  id?: string;
+  name?: string;
   type: QuestionType;
-  position: number;
   fk_page_id: number;
 };
 

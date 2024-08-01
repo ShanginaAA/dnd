@@ -1,15 +1,16 @@
-import { Box, IconButton, Tooltip, Typography } from '@mui/material';
-import React, { FC, MouseEvent } from 'react';
+import { Box, Typography } from '@mui/material';
+import { FC, MouseEvent } from 'react';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { selectItemById, selectTotal } from './slice';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
+import { DraggableProvided } from '@hello-pangea/dnd';
 
 type HeadProps = {
   id: number;
+  provided: DraggableProvided;
 };
 
-const Head: FC<HeadProps> = ({ id }) => {
+const Head: FC<HeadProps> = ({ id, provided }) => {
   const dispatch = useAppDispatch();
   const total = useAppSelector(selectTotal);
   const item = useAppSelector((state) => selectItemById(state, id));
@@ -30,8 +31,10 @@ const Head: FC<HeadProps> = ({ id }) => {
         cursor: 'move',
       }}>
       <Box
+        {...provided.dragHandleProps}
         component="img"
         src={'/elements/up-down-left-right.png'}
+        draggable="false"
         sx={{ height: 16, ml: 1, mr: 2 }}
       />
       <Typography
@@ -43,17 +46,13 @@ const Head: FC<HeadProps> = ({ id }) => {
         }}>
         {total === 1 ? `Страница ${item?.page}` : `Страница ${item?.page} из ${total}`}
       </Typography>
-      <Tooltip title="Удалить" placement="right-start" sx={{ display: total === 1 ? 'none' : '' }}>
-        <IconButton aria-label="Удалить" onClick={onClickDelPage}>
-          <DeleteIcon />
-        </IconButton>
-      </Tooltip>
 
-      {/* <Box
+      <Box
         component="img"
         src={'/elements/trash-can.png'}
+        draggable="false"
         sx={{ height: 16, mr: 2, cursor: 'pointer' }}
-      /> */}
+      />
     </Box>
   );
 };

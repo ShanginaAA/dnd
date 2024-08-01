@@ -14,6 +14,7 @@ import {
 import storage from 'redux-persist/lib/storage';
 import { questionsSlice } from '../../features/constructor/questions/slice';
 import { pagesSlice } from '../../features/constructor/pages/slice';
+import { questionTypeSlice } from '../../features/constructor/sidebar/slice';
 
 const persistConfig = {
   key: 'root',
@@ -23,6 +24,7 @@ const persistConfig = {
 const rootRedusers = combineReducers({
   [questionsSlice.name]: questionsSlice.reducer,
   [pagesSlice.name]: pagesSlice.reducer,
+  [questionTypeSlice.name]: questionTypeSlice.reducer,
 });
 
 const store = configureStore({
