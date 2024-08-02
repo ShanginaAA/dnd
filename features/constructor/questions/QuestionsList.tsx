@@ -17,16 +17,16 @@ const QuestionsList: FC<QuestionsListParams> = ({ page_id }) => {
 
   return (
     <Droppable droppableId={`page-${page_id}`} type={`droppableSubItem`}>
-      {(provided, snapshot) => (
-        <div ref={provided.innerRef} style={{ backgroundColor: 'rgba(0,0,0,.02)' }}>
-          <Box
-            sx={{
-              position: 'relative',
-              pb: 0,
-              ...(questionIds.length > 0 && { pb: '93px' }),
-            }}>
-            {questionIds.length > 0 ? (
-              questionIds.map((item, index) =>
+      {(provided, snapshot) =>
+        questionIds.length > 0 ? (
+          <div ref={provided.innerRef} style={{ backgroundColor: 'rgba(0,0,0,.02)' }}>
+            <Box
+              sx={{
+                position: 'relative',
+                pb: 0,
+                ...(questionIds.length > 0 && { pb: '93px' }),
+              }}>
+              {questionIds.map((item, index) =>
                 questions
                   .filter((obj) => obj.id === `${item}`)
                   .map((obj) => (
@@ -37,8 +37,12 @@ const QuestionsList: FC<QuestionsListParams> = ({ page_id }) => {
                           {...provided.draggableProps}
                           style={{
                             ...provided.draggableProps.style,
+                            height: 93,
+                            paddingLeft: 44,
+                            textAlign: 'left',
+                            backgroundColor: '#fff',
                             borderBottom: '1px solid #D9D9D9',
-                            height: 108,
+                            opacity: snapshot.isDragging ? '0.3' : '1',
                           }}>
                           <QuestionItem
                             key={index}
@@ -50,14 +54,16 @@ const QuestionsList: FC<QuestionsListParams> = ({ page_id }) => {
                       )}
                     </Draggable>
                   )),
-              )
-            ) : (
-              <EmptyPage />
-            )}
-          </Box>
-          {provided.placeholder}
-        </div>
-      )}
+              )}
+            </Box>
+            {provided.placeholder}
+          </div>
+        ) : (
+          <div ref={provided.innerRef} style={{ backgroundColor: 'rgba(0,0,0,.02)' }}>
+            <EmptyPage snapshot={snapshot} />
+          </div>
+        )
+      }
     </Droppable>
   );
 };

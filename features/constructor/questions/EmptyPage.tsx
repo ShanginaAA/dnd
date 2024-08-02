@@ -1,9 +1,13 @@
+import { DroppableStateSnapshot } from '@hello-pangea/dnd';
 import { Box } from '@mui/material';
-import React from 'react';
+import { FC } from 'react';
 
-const EmptyPage = () => {
+type EmptyPageProps = {
+  snapshot: DroppableStateSnapshot;
+};
+const EmptyPage: FC<EmptyPageProps> = ({ snapshot }) => {
   return (
-    <Box sx={{ height: '126px', padding: '24px 32px 32px' }}>
+    <Box sx={{ height: '73px', padding: '24px 32px 32px' }}>
       <Box
         sx={{
           display: 'flex',
@@ -14,6 +18,11 @@ const EmptyPage = () => {
           color: '#A0A0A0',
           border: 'dashed 2px #D9D9D9',
           borderRadius: '6px',
+          ...(snapshot.isDraggingOver && {
+            color: 'rgba(0,0,0,.7)',
+            borderColor: 'rgba(0,0,0,.5)',
+            backgroundColor: 'rgba(0,0,0,.03)',
+          }),
         }}>
         Добавьте сюда вопросы формы
       </Box>
