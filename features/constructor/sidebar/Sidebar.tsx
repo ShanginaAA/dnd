@@ -12,7 +12,7 @@ const Sidebar: FC = () => {
   return (
     <Box sx={{ position: 'relative', fontSize: 14, width: '230px', mr: '16px' }}>
       <Droppable droppableId="types" isDropDisabled={true} type={`droppableSubItem`}>
-        {(provided, snapshot) => (
+        {(provided) => (
           <div ref={provided.innerRef}>
             {typeQuestions.map((item, index) => (
               <Draggable key={item.id} draggableId={`type-${item.id}`} index={+item.id}>

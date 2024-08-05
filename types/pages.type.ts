@@ -14,3 +14,10 @@ export type PagePosition = {
   start_index: number;
   end_index: number;
 };
+
+export type PlaceholderProps = {
+  clientHeight: number;
+  clientWidth: number;
+  clientY: number;
+  clientX: number;
+};

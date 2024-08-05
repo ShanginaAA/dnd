@@ -15,7 +15,7 @@ const Head: FC<HeadProps> = ({ id, provided }) => {
   const total = useAppSelector(selectTotal);
   const item = useAppSelector((state) => selectItemById(state, id));
 
-  const onClickDelPage = (e: MouseEvent<HTMLButtonElement>) => {
+  const onClickDelPage = (e: MouseEvent<HTMLImageElement>) => {
     e.preventDefault();
     console.log(item?.id);
     // dispatch();
@@ -23,6 +23,7 @@ const Head: FC<HeadProps> = ({ id, provided }) => {
 
   return (
     <Box
+      {...provided.dragHandleProps}
       sx={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -31,7 +32,6 @@ const Head: FC<HeadProps> = ({ id, provided }) => {
         cursor: 'move',
       }}>
       <Box
-        {...provided.dragHandleProps}
         component="img"
         src={'/elements/up-down-left-right.png'}
         draggable="false"
@@ -52,6 +52,7 @@ const Head: FC<HeadProps> = ({ id, provided }) => {
         src={'/elements/trash-can.png'}
         draggable="false"
         sx={{ height: 16, mr: 2, cursor: 'pointer' }}
+        onClick={onClickDelPage}
       />
     </Box>
   );

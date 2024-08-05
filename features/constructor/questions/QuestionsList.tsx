@@ -25,6 +25,9 @@ const QuestionsList: FC<QuestionsListParams> = ({ page_id }) => {
                 position: 'relative',
                 pb: 0,
                 ...(questionIds.length > 0 && { pb: '93px' }),
+                ...(snapshot.isDraggingOver && {
+                  backgroundColor: 'rgba(0,0,0,.03)',
+                }),
               }}>
               {questionIds.map((item, index) =>
                 questions

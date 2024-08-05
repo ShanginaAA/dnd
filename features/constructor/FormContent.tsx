@@ -1,23 +1,113 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { Box, Button } from '@mui/material';
 import Sidebar from './sidebar/Sidebar';
 import QuestionsPage from './pages/QuestionsPage';
-import { DragDropContext, DropResult } from '@hello-pangea/dnd';
+import { DragDropContext, DragStart, DragUpdate, DropResult } from '@hello-pangea/dnd';
 import { useAppSelector } from '~/hooks/useAppSelector';
 import { selectQuestionTypeItems } from './sidebar/slice';
 import { useAppDispatch } from '~/hooks/useAppDispatch';
 import { addItem, selectItems } from './questions/slice';
 import { addQuestionId, moveQuestion, reorderPage, reorderQuestionIds } from './pages/slice';
+import { PlaceholderProps } from '~/types/pages.type';
 
 const FormContent: FC = () => {
   const dispatch = useAppDispatch();
   const typeQuestions = useAppSelector(selectQuestionTypeItems);
   const questions = useAppSelector(selectItems);
+  const [placeholderProps, setPlaceholderProps] = useState<PlaceholderProps>();
+
+  const getDraggedDom = (draggableId: string) => {
+    const domQuery = `[data-rfd-draggable-id='${draggableId}']`;
+    const draggedDOM = document.querySelector(domQuery);
+    return draggedDOM;
+  };
+
+  const onDragStart = (start: DragStart) => {
+    const { draggableId, source } = start;
+
+    // if (!draggableId.includes('page-list')) return;
+
+    const draggedDOM = getDraggedDom(draggableId);
+
+    if (!draggedDOM) return;
+
+    const { clientHeight, clientWidth } = draggedDOM;
+    const sourceIndex = source.index;
+
+    if (!draggedDOM.parentElement) return;
+
+    const elem = draggedDOM.parentElement;
+    const rect = elem.getBoundingClientRect();
+
+    const clientY =
+      rect.top +
+      window.scrollY +
+      [...elem.children].slice(0, sourceIndex).reduce((total, curr) => {
+        const style = window.getComputedStyle(curr);
+        const marginBottom = parseFloat(style.marginBottom);
+        return total + curr.clientHeight + marginBottom;
+      }, 0);
+
+    setPlaceholderProps({
+      clientHeight,
+      clientWidth,
+      clientY: clientY,
+      clientX: rect.left,
+    });
+  };
+
+  const onDragUpdate = (update: DragUpdate) => {
+    const { destination, source, draggableId } = update;
+
+    if (!destination) return;
+
+    // if (!draggableId.includes('page-list')) return;
+
+    const draggedDOM = getDraggedDom(draggableId);
+
+    if (!draggedDOM) return;
+
+    const { clientHeight, clientWidth } = draggedDOM;
+    const destinationIndex = destination.index;
+    const sourceIndex = source.index;
+
+    if (!draggedDOM.parentElement) return;
+
+    const elem = draggedDOM.parentElement;
+
+    const childrenArray = [...elem.children];
+    const movedItem = childrenArray[sourceIndex];
+    childrenArray.splice(sourceIndex, 1);
+
+    const updatedArray = [
+      ...childrenArray.slice(0, destinationIndex),
+      movedItem,
+      ...childrenArray.slice(destinationIndex + 1),
+    ];
+
+    const rect = elem.getBoundingClientRect();
+
+    const clientY =
+      rect.top +
+      window.scrollY +
+      updatedArray.slice(0, destinationIndex).reduce((total, curr) => {
+        const style = window.getComputedStyle(curr);
+        const marginBottom = parseFloat(style.marginBottom);
+        return total + curr.clientHeight + marginBottom;
+      }, 0);
+
+    setPlaceholderProps({
+      clientHeight,
+      clientWidth,
+      clientY: clientY,
+      clientX: rect.left,
+    });
+  };
 
   const onDragEnd = (result: DropResult) => {
+    setPlaceholderProps(undefined);
     const { source, destination } = result;
 
-    console.log(result);
     if (!destination) {
       return;
     }
@@ -27,7 +117,6 @@ const FormContent: FC = () => {
 
     switch (source.droppableId) {
       case 'pages':
-        console.log('pages');
         dispatch(
           reorderPage({
             start_index: source.index,
@@ -80,13 +169,13 @@ const FormContent: FC = () => {
         minHeight: '600px',
         mt: 1,
       }}>
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart} onDragUpdate={onDragUpdate}>
         <Sidebar />
         <Box
           sx={{
             flex: 1,
           }}>
-          <QuestionsPage />
+          <QuestionsPage placeholderProps={placeholderProps} />
           <Button variant="contained" color="inherit" sx={{ width: '100%', height: 56 }}>
             Добавить страницу
           </Button>
