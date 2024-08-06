@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import Sidebar from './sidebar/Sidebar';
 import QuestionsPage from './pages/QuestionsPage';
 import { DragDropContext, DragStart, DragUpdate, DropResult } from '@hello-pangea/dnd';
@@ -7,13 +7,20 @@ import { useAppSelector } from '~/hooks/useAppSelector';
 import { selectQuestionTypeItems } from './sidebar/slice';
 import { useAppDispatch } from '~/hooks/useAppDispatch';
 import { addItem, selectItems } from './questions/slice';
-import { addQuestionId, moveQuestion, reorderPage, reorderQuestionIds } from './pages/slice';
+import {
+  addQuestionId,
+  moveQuestion,
+  reorderPage,
+  reorderQuestionIds,
+  selectQuestionIdsById,
+} from './pages/slice';
 import { PlaceholderProps } from '~/types/pages.type';
 
 const FormContent: FC = () => {
   const dispatch = useAppDispatch();
   const typeQuestions = useAppSelector(selectQuestionTypeItems);
   const questions = useAppSelector(selectItems);
+
   const [placeholderProps, setPlaceholderProps] = useState<PlaceholderProps>();
 
   const getDraggedDom = (draggableId: string) => {
@@ -25,7 +32,7 @@ const FormContent: FC = () => {
   const onDragStart = (start: DragStart) => {
     const { draggableId, source } = start;
 
-    // if (!draggableId.includes('page-list')) return;
+    if (!draggableId.includes('page-list')) return;
 
     const draggedDOM = getDraggedDom(draggableId);
 
@@ -61,7 +68,7 @@ const FormContent: FC = () => {
 
     if (!destination) return;
 
-    // if (!draggableId.includes('page-list')) return;
+    if (!draggableId.includes('page-list')) return;
 
     const draggedDOM = getDraggedDom(draggableId);
 
@@ -149,6 +156,11 @@ const FormContent: FC = () => {
         );
         break;
       default:
+        const domQuery = `page-list-${sourcePageId}`;
+        const deleteDOM = document.getElementById(domQuery);
+
+        if (!deleteDOM) return;
+
         dispatch(
           moveQuestion({
             source_page_id: sourcePageId,
@@ -157,6 +169,11 @@ const FormContent: FC = () => {
             destination_index: destination.index,
           }),
         );
+        // нужно добавить удаление
+
+        console.log(deleteDOM);
+        // deleteDOM.style.opacity = '0';
+
         break;
     }
   };
@@ -176,9 +193,6 @@ const FormContent: FC = () => {
             flex: 1,
           }}>
           <QuestionsPage placeholderProps={placeholderProps} />
-          <Button variant="contained" color="inherit" sx={{ width: '100%', height: 56 }}>
-            Добавить страницу
-          </Button>
         </Box>
       </DragDropContext>
     </Box>

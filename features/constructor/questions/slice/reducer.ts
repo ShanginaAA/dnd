@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { fetchQuestions } from './actions';
-import { QuestionPosition, Questions } from '../../../../types/questions.type';
+import { Questions } from '~/types/questions.type';
 
 export enum Status {
   LOADING = 'loading',

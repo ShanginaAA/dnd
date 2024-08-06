@@ -7,8 +7,8 @@ import { selectQuestionTypeItems } from './slice';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 
 const Sidebar: FC = () => {
-  console.log('Sidebar');
   const typeQuestions = useAppSelector(selectQuestionTypeItems);
+
   return (
     <Box sx={{ position: 'relative', fontSize: 14, width: '230px', mr: '16px' }}>
       <Droppable droppableId="types" isDropDisabled={true} type={`droppableSubItem`}>

@@ -19,3 +19,7 @@ export const selectTotal = (state: RootState) => {
 export const selectPage = (state: RootState) => {
   return state.formPages;
 };
+
+export const selectLastPage = (state: RootState) => {
+  return state.formPages.items.slice(-1)[0];
+};

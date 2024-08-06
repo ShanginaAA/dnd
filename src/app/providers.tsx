@@ -7,7 +7,7 @@ import { PersistGate } from 'redux-persist/es/integration/react';
 
 export default function Providers({ children }: PropsWithChildren) {
   return (
-    <Provider store={store}>
+    <Provider store={store} stabilityCheck="never">
       <PersistGate loading={<>Загрузка...</>} persistor={persistor}>
         {children}
       </PersistGate>

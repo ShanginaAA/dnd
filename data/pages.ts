@@ -9,11 +9,11 @@ export const PAGES: FormPages[] = [
   {
     id: 2,
     page: 2,
-    questionIds: [4, 5],
+    questionIds: [4],
   },
   {
     id: 3,
     page: 3,
-    questionIds: [],
+    questionIds: [5],
   },
 ];

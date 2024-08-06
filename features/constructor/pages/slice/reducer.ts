@@ -27,7 +27,7 @@ export const pagesSlice = createSlice({
   name: 'formPages',
   initialState,
   reducers: {
-    addItem(state, action: PayloadAction<FormPages>) {
+    addPage(state, action: PayloadAction<FormPages>) {
       state.items.push({ ...action.payload });
       state.total = state.items.length;
     },
@@ -36,18 +36,15 @@ export const pagesSlice = createSlice({
 
       questionIds.splice(action.payload.destination_index, 0, action.payload.questionId);
     },
-    removeItem(state, action: PayloadAction<number>) {
+    removePage(state, action: PayloadAction<number>) {
       state.items = state.items.filter((obj) => obj.id !== action.payload);
+      state.total -= 1;
     },
     reorderPage(state, action: PayloadAction<PagePosition>) {
       // удалить 1 элемент начиная с start_index (source.index)
       const [removed] = state.items.splice(action.payload.start_index, 1);
       // с идндекса назначения (destination.index) удалить 0 элеметов и вставить removed
       state.items.splice(action.payload.end_index, 0, removed);
-
-      // state.items.map((obj) =>
-      //   obj.id === action.payload.fk_page_id ? (obj.questionIds = result) : obj,
-      // );
     },
     reorderQuestionIds(state, action: PayloadAction<QuestionPosition>) {
       const result = state.items.find((obj) => obj.id === action.payload.fk_page_id)?.questionIds!;
@@ -67,6 +64,12 @@ export const pagesSlice = createSlice({
       const [removed] = sourceClone.questionIds.splice(action.payload.source_index, 1);
       // с индекса назначения (destination.index) удалить 0 элеметов и вставить removed на другую страницу
       destClone!.questionIds.splice(action.payload.destination_index, 0, removed);
+
+      // // удаляем стр, если она пустая и не последняя
+      // if (sourceClone.questionIds.length === 0) {
+      //   state.items = state.items.filter((obj) => obj.id !== action.payload.source_page_id);
+      //   state.total -= 1;
+      // }
     },
   },
   extraReducers: (builder) => {
@@ -90,7 +93,7 @@ export const pagesSlice = createSlice({
   },
 });
 
-export const { addItem, addQuestionId, removeItem, reorderPage, reorderQuestionIds, moveQuestion } =
+export const { addPage, addQuestionId, removePage, reorderPage, reorderQuestionIds, moveQuestion } =
   pagesSlice.actions;
 
 export default pagesSlice.reducer;

@@ -62,7 +62,7 @@ const QuestionsList: FC<QuestionsListParams> = ({ page_id }) => {
             {provided.placeholder}
           </div>
         ) : (
-          <div ref={provided.innerRef} style={{ backgroundColor: 'rgba(0,0,0,.02)' }}>
+          <div ref={provided.innerRef}>
             <EmptyPage snapshot={snapshot} />
           </div>
         )
