@@ -2,7 +2,6 @@
 
 import { DropResult } from '@hello-pangea/dnd';
 import React from 'react';
-import { useAppSelector } from '../../../../../hooks/useAppSelector';
 
 export const useQuestionDnd = () => {
   const onDragEnd = (result: DropResult) => {

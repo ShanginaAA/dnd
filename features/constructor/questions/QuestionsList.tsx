@@ -1,35 +1,37 @@
-import { Box } from '@mui/material';
-import { FC } from 'react';
+import { FC, Fragment } from 'react';
 import QuestionItem from './QuestionItem';
 import { useAppSelector } from '~/hooks/useAppSelector';
 import { selectItems } from './slice';
-import { selectQuestionIdsById } from '../pages/slice';
+import { Droppable, Draggable } from '@hello-pangea/dnd';
+import { FormPages, PlaceholderProps } from '~/types/pages.type';
+import { Box } from '@mui/material';
 import EmptyPage from './EmptyPage';
-import { Draggable, Droppable } from '@hello-pangea/dnd';
+import { isUndefined } from 'lodash';
 
 type QuestionsListParams = {
-  page_id: number;
+  item: FormPages;
+  placeholderProps: PlaceholderProps | undefined;
 };
 
-const QuestionsList: FC<QuestionsListParams> = ({ page_id }) => {
-  const questionIds = useAppSelector((state) => selectQuestionIdsById(state, page_id));
+const QuestionsList: FC<QuestionsListParams> = ({ item, placeholderProps }) => {
   const questions = useAppSelector(selectItems);
 
   return (
-    <Droppable droppableId={`page-${page_id}`} type={`droppableSubItem`}>
+    <Droppable droppableId={`page-${item.id}`} type={`droppableSubItem`}>
       {(provided, snapshot) =>
-        questionIds.length > 0 ? (
-          <div ref={provided.innerRef} style={{ backgroundColor: 'rgba(0,0,0,.02)' }}>
+        item.questionIds.length > 0 ? (
+          <div
+            ref={provided.innerRef}
+            style={{
+              backgroundColor: 'rgba(0,0,0,.02)',
+            }}>
             <Box
+              data-id={`questions-page-${item.id}`}
               sx={{
                 position: 'relative',
-                pb: 0,
-                ...(questionIds.length > 0 && { pb: '93px' }),
-                ...(snapshot.isDraggingOver && {
-                  backgroundColor: 'rgba(0,0,0,.03)',
-                }),
+                pb: '93px',
               }}>
-              {questionIds.map((item, index) =>
+              {item.questionIds.map((item, index) =>
                 questions
                   .filter((obj) => obj.id === `${item}`)
                   .map((obj) => (
@@ -58,12 +60,34 @@ const QuestionsList: FC<QuestionsListParams> = ({ page_id }) => {
                     </Draggable>
                   )),
               )}
+              {provided.placeholder && (
+                <div
+                  style={{
+                    height: snapshot.isDraggingOver ? 93 : 0,
+                  }}>
+                  {provided.placeholder}
+                </div>
+              )}
+
+              {snapshot.isDraggingOver &&
+                !isUndefined(placeholderProps) &&
+                placeholderProps.destination == `page-${item.id}` && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      backgroundColor: 'rgba(0,0,0,.03)',
+                      top: placeholderProps.clientY,
+                      left: placeholderProps.clientX,
+                      height: placeholderProps.clientHeight,
+                      width: placeholderProps.clientWidth,
+                    }}
+                  />
+                )}
             </Box>
-            {provided.placeholder}
           </div>
         ) : (
           <div ref={provided.innerRef}>
-            <EmptyPage snapshot={snapshot} />
+            <EmptyPage snapshot={snapshot} page={item.page} />
           </div>
         )
       }

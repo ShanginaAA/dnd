@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Grid } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { FC, Fragment } from 'react';
 import { useAppSelector } from '~/hooks/useAppSelector';
 import { selectQuestionTypeItems } from './slice';

@@ -16,6 +16,7 @@ export type PagePosition = {
 };
 
 export type PlaceholderProps = {
+  destination: string;
   clientHeight: number;
   clientWidth: number;
   clientY: number;

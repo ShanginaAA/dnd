@@ -4,8 +4,9 @@ import { FC } from 'react';
 
 type EmptyPageProps = {
   snapshot: DroppableStateSnapshot;
+  page: number;
 };
-const EmptyPage: FC<EmptyPageProps> = ({ snapshot }) => {
+const EmptyPage: FC<EmptyPageProps> = ({ snapshot, page }) => {
   return (
     <Box sx={{ height: '73px', padding: '24px 32px 32px' }}>
       <Box

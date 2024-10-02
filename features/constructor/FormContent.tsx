@@ -1,7 +1,6 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 import Sidebar from './sidebar/Sidebar';
-import QuestionsPage from './pages/QuestionsPage';
 import { DragDropContext, DragStart, DragUpdate, DropResult } from '@hello-pangea/dnd';
 import { useAppSelector } from '~/hooks/useAppSelector';
 import { selectQuestionTypeItems } from './sidebar/slice';
@@ -10,11 +9,13 @@ import { addItem, selectItems } from './questions/slice';
 import {
   addQuestionId,
   moveQuestion,
+  removePage,
   reorderPage,
   reorderQuestionIds,
-  selectQuestionIdsById,
+  selectTotal,
 } from './pages/slice';
 import { PlaceholderProps } from '~/types/pages.type';
+import PanelPages from './pages/PanelPages';
 
 const FormContent: FC = () => {
   const dispatch = useAppDispatch();
@@ -23,8 +24,11 @@ const FormContent: FC = () => {
 
   const [placeholderProps, setPlaceholderProps] = useState<PlaceholderProps>();
 
-  const getDraggedDom = (draggableId: string) => {
-    const domQuery = `[data-rfd-draggable-id='${draggableId}']`;
+  const draggableAttr = 'data-rfd-draggable-id=';
+  const droppableQuestionsAttr = 'data-id=questions-';
+
+  const getDom = (key: string, value: string) => {
+    const domQuery = `[${key}${value}]`;
     const draggedDOM = document.querySelector(domQuery);
     return draggedDOM;
   };
@@ -32,9 +36,7 @@ const FormContent: FC = () => {
   const onDragStart = (start: DragStart) => {
     const { draggableId, source } = start;
 
-    if (!draggableId.includes('page-list')) return;
-
-    const draggedDOM = getDraggedDom(draggableId);
+    const draggedDOM = getDom(draggableAttr, draggableId);
 
     if (!draggedDOM) return;
 
@@ -46,20 +48,23 @@ const FormContent: FC = () => {
     const elem = draggedDOM.parentElement;
     const rect = elem.getBoundingClientRect();
 
-    const clientY =
-      rect.top +
-      window.scrollY +
-      [...elem.children].slice(0, sourceIndex).reduce((total, curr) => {
-        const style = window.getComputedStyle(curr);
-        const marginBottom = parseFloat(style.marginBottom);
-        return total + curr.clientHeight + marginBottom;
-      }, 0);
+    const culcOffset = [...elem.children].slice(0, sourceIndex).reduce((total, curr) => {
+      const style = window.getComputedStyle(curr);
+      const marginBottom = parseFloat(style.marginBottom);
+      return total + curr.clientHeight + marginBottom;
+    }, 0);
+
+    const clientX = draggableId.includes('page-') ? rect.left : 0;
+    const clientY = draggableId.includes('page-')
+      ? rect.top + window.scrollY + culcOffset
+      : culcOffset;
 
     setPlaceholderProps({
+      destination: source.droppableId,
       clientHeight,
       clientWidth,
       clientY: clientY,
-      clientX: rect.left,
+      clientX: clientX,
     });
   };
 
@@ -68,9 +73,11 @@ const FormContent: FC = () => {
 
     if (!destination) return;
 
-    if (!draggableId.includes('page-list')) return;
-
-    const draggedDOM = getDraggedDom(draggableId);
+    const draggedDOM = getDom(draggableAttr, draggableId);
+    const droppedDOM =
+      draggableId.includes('type') || source.droppableId !== destination.droppableId
+        ? getDom(droppableQuestionsAttr, destination.droppableId)
+        : null;
 
     if (!draggedDOM) return;
 
@@ -79,8 +86,7 @@ const FormContent: FC = () => {
     const sourceIndex = source.index;
 
     if (!draggedDOM.parentElement) return;
-
-    const elem = draggedDOM.parentElement;
+    const elem = !droppedDOM ? draggedDOM.parentElement : droppedDOM;
 
     const childrenArray = [...elem.children];
     const movedItem = childrenArray[sourceIndex];
@@ -92,38 +98,42 @@ const FormContent: FC = () => {
       ...childrenArray.slice(destinationIndex + 1),
     ];
 
-    const rect = elem.getBoundingClientRect();
+    const rect = !droppedDOM ? elem.getBoundingClientRect() : draggedDOM.getBoundingClientRect();
 
-    const clientY =
-      rect.top +
-      window.scrollY +
-      updatedArray.slice(0, destinationIndex).reduce((total, curr) => {
-        const style = window.getComputedStyle(curr);
-        const marginBottom = parseFloat(style.marginBottom);
-        return total + curr.clientHeight + marginBottom;
-      }, 0);
+    const culcOffset = updatedArray.slice(0, destinationIndex).reduce((total, curr) => {
+      const style = window.getComputedStyle(curr);
+      const marginBottom = parseFloat(style.marginBottom);
+      return total + curr.clientHeight + marginBottom;
+    }, 0);
+
+    const clientH = !draggableId.includes('type-') ? clientHeight : 93;
+    const clientW = !draggableId.includes('type-') ? clientWidth : 702;
+
+    const clientX = draggableId.includes('page-') ? rect.left : 0;
+    const clientY = draggableId.includes('page-')
+      ? rect.top + window.scrollY + culcOffset
+      : culcOffset;
 
     setPlaceholderProps({
-      clientHeight,
-      clientWidth,
+      destination: destination.droppableId,
+      clientHeight: clientH,
+      clientWidth: clientW,
       clientY: clientY,
-      clientX: rect.left,
+      clientX: clientX,
     });
   };
 
   const onDragEnd = (result: DropResult) => {
     setPlaceholderProps(undefined);
-    const { source, destination } = result;
+    const { source, destination, draggableId } = result;
 
-    if (!destination) {
-      return;
-    }
+    if (!destination) return;
 
     const destinationPageId = +destination.droppableId.split('-')[1];
     const sourcePageId = +source.droppableId.split('-')[1];
 
     switch (source.droppableId) {
-      case 'pages':
+      case 'pages': // если перетаскивают страницу
         dispatch(
           reorderPage({
             start_index: source.index,
@@ -131,7 +141,7 @@ const FormContent: FC = () => {
           }),
         );
         break;
-      case destination.droppableId:
+      case destination.droppableId: //  если перетаскивают вопросы в пределах страницы
         dispatch(
           reorderQuestionIds({
             start_index: source.index,
@@ -140,7 +150,7 @@ const FormContent: FC = () => {
           }),
         );
         break;
-      case 'types':
+      case 'types': // если перетаскивают новый вопрос на страницу
         dispatch(
           addItem({
             type: typeQuestions.find((obj) => obj.id === `${source.index}`)!,
@@ -155,12 +165,7 @@ const FormContent: FC = () => {
           }),
         );
         break;
-      default:
-        const domQuery = `page-list-${sourcePageId}`;
-        const deleteDOM = document.getElementById(domQuery);
-
-        if (!deleteDOM) return;
-
+      default: // если вопрос перетаскивают на другую страницу
         dispatch(
           moveQuestion({
             source_page_id: sourcePageId,
@@ -169,11 +174,37 @@ const FormContent: FC = () => {
             destination_index: destination.index,
           }),
         );
-        // нужно добавить удаление
 
-        console.log(deleteDOM);
-        // deleteDOM.style.opacity = '0';
+        // получаем вопросы на страницe
+        const draggedDOM = getDom(draggableAttr, draggableId);
+        if (!draggedDOM) return;
+        if (!draggedDOM.parentElement) return;
+        const questionsPage = draggedDOM.parentElement;
 
+        // получаем все страницы
+        const pagesDOM = getDom('data-id=', 'page-list');
+        if (!pagesDOM) return;
+
+        // получаем страницу для удаления
+        const domQuery = `page-${sourcePageId}`;
+        const deleteDOM = document.getElementById(domQuery);
+        if (!deleteDOM) return;
+        // индекс страницы
+        const indexPage = [...pagesDOM.children].indexOf(deleteDOM);
+
+        // если пустая страница и она является не последней
+        if (
+          [...questionsPage.children].length === 2 &&
+          indexPage !== [...pagesDOM.children].length - 1
+        ) {
+          // удаляем страницу
+          setTimeout(() => {
+            dispatch(removePage(sourcePageId));
+          }, 1000);
+
+          deleteDOM.style.transition = 'opacity 1s';
+          deleteDOM.style.opacity = '0';
+        }
         break;
     }
   };
@@ -188,12 +219,8 @@ const FormContent: FC = () => {
       }}>
       <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart} onDragUpdate={onDragUpdate}>
         <Sidebar />
-        <Box
-          sx={{
-            flex: 1,
-          }}>
-          <QuestionsPage placeholderProps={placeholderProps} />
-        </Box>
+
+        <PanelPages placeholderProps={placeholderProps} />
       </DragDropContext>
     </Box>
   );

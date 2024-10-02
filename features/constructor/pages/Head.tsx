@@ -8,31 +8,33 @@ import { DraggableProvided } from '@hello-pangea/dnd';
 type HeadProps = {
   id: number;
   index: number;
-  provided: DraggableProvided;
+  parentProvider: DraggableProvided;
 };
 
-const Head: FC<HeadProps> = ({ id, index, provided }) => {
+const Head: FC<HeadProps> = ({ id, index, parentProvider }) => {
   const dispatch = useAppDispatch();
   const total = useAppSelector(selectTotal);
-  const item = useAppSelector((state) => selectItemById(state, id));
+  console.log();
 
   const onClickDelPage = (e: MouseEvent<HTMLImageElement>) => {
     e.preventDefault();
-    const domQuery = `page-list-${item!.id}`;
+    const domQuery = `page-${id}`;
     const deleteDOM = document.getElementById(domQuery);
 
     if (!deleteDOM) return;
 
     setTimeout(() => {
-      dispatch(removePage(item!.id));
+      dispatch(removePage(id));
     }, 1000);
 
+    deleteDOM.style.transition = 'opacity 1s';
     deleteDOM.style.opacity = '0';
+    console.log('delete');
   };
 
   return (
     <Box
-      {...provided.dragHandleProps}
+      {...parentProvider.dragHandleProps}
       sx={{
         display: 'flex',
         justifyContent: 'space-between',
